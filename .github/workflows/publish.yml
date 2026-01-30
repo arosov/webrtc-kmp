@@ -8,6 +8,9 @@ on:
 jobs:
   publish:
     runs-on: macos-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - uses: actions/checkout@v2
 
@@ -37,11 +40,7 @@ jobs:
       - name: Extract version from tag
         run: ./version-up.sh --prefix v --stay
 
-      - name: Publish to MavenCentral
-        run: VERSION=$(cat version.properties | grep snapshot.version | awk -F '=v' '{print $2}') ./gradlew -Dorg.gradle.jvmargs=-Xmx4g publish
+      - name: Publish to GitHub Packages
+        run: VERSION=$(cat version.properties | grep snapshot.version | awk -F '=v' '{print $2}') ./gradlew -Dorg.gradle.jvmargs=-Xmx4g publishAllPublicationsToGitHubPackagesRepository
         env:
-          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
-          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
-          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.GPG_PRIVATE_KEY }}
-          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.GPG_PASSWORD }}
-          ORG_GRADLE_PROJECT_signingInMemoryKeyId: ${{ secrets.GPG_KEY_ID }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

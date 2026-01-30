@@ -4,6 +4,8 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetTree
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
@@ -11,7 +13,13 @@ plugins {
     kotlin("native.cocoapods")
 }
 
-group = "com.shepeliev"
+val localProperties = Properties()
+val localPropertiesFile = project.rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(localPropertiesFile.inputStream())
+}
+
+group = "io.github.arosov"
 
 version = System.getenv("VERSION") ?: "0.0.0"
 
@@ -25,7 +33,7 @@ kotlin {
     cocoapods {
         version = project.version.toString()
         summary = "WebRTC Kotlin Multiplatform SDK"
-        homepage = "https://github.com/shepeliev/webrtc-kmp"
+        homepage = "https://github.com/arosov/webrtc-kmp"
         ios.deploymentTarget = "13.0"
 
         noPodspec()
@@ -163,16 +171,26 @@ android {
     }
 }
 
-mavenPublishing {
-    publishToMavenCentral()
-    signAllPublications()
+publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/arosov/webrtc-kmp")
+            credentials {
+                username = localProperties.getProperty("GITHUB_ACTOR") ?: System.getenv("GITHUB_ACTOR")
+                password = localProperties.getProperty("GITHUB_TOKEN") ?: System.getenv("GITHUB_TOKEN")
+            }
+        }
+    }
+}
 
+mavenPublishing {
     coordinates(project.group.toString(), project.name, "${project.version}")
 
     pom {
         name = "WebRTC KMP"
         description = "WebRTC Kotlin Multiplatform SDK."
-        url = "https://github.com/shepeliev/webrtc-kmp"
+        url = "https://github.com/arosov/webrtc-kmp"
 
         licenses {
             license {
@@ -184,16 +202,16 @@ mavenPublishing {
 
         developers {
             developer {
-                id = "shepeliev"
-                name = "Oleksandr Shepeliev"
-                email = "a.shepeliev@gmail.com"
+                id = "arosov"
+                name = "arosov"
+                email = "arosov@users.noreply.github.com"
             }
         }
 
         scm {
-            url = "https://github.com/shepeliev/webrtc-kmp"
-            connection = "scm:git:https://github.com/shepeliev/webrtc-kmp.git"
-            developerConnection = "scm:git:https://github.com/shepeliev/webrtc-kmp.git"
+            url = "https://github.com/arosov/webrtc-kmp"
+            connection = "scm:git:https://github.com/arosov/webrtc-kmp.git"
+            developerConnection = "scm:git:https://github.com/arosov/webrtc-kmp.git"
         }
     }
 }
