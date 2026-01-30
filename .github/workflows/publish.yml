@@ -7,23 +7,12 @@ on:
 
 jobs:
   publish:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
     steps:
       - uses: actions/checkout@v2
-
-      - name: Cocoapods cache
-        uses: actions/cache@v3
-        id: cocoapods-cache
-        with:
-          path: |
-            ~/.cocoapods
-            ~/Library/Caches/CocoaPods
-            */build/cocoapods
-            */build/classes
-          key: cocoapods-cache
 
       - name: Set up JDK 17
         uses: actions/setup-java@v1
